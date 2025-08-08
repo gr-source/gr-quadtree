@@ -106,16 +106,18 @@ typedef struct Player
 typedef struct QuadTreeNode
 {
     QuadtreeID parent;
-
+    
+    /*
     QuadtreeID northwest;
     QuadtreeID northeast;
     QuadtreeID southwest;
     QuadtreeID southeast;
+    */
 
     QuadtreeID first;
     QuadtreeID next;
 
-    void *data[4];
+    void *data[10];
     std::size_t size;
 
     Rect boundary;
@@ -159,14 +161,6 @@ public:
 
     ~QuadTreeManager()
     {
-        for (std::size_t i={};i<m_size;i++)
-        {
-            QuadTreeNode &node = m_nodes[i];
-            // if (node.data != nullptr)
-            {
-                // std::free(node.data);
-            }
-        }
         std::free(m_nodes);
     }
 
@@ -235,52 +229,37 @@ public:
 
         if (node.divided)
         {
+            for (QuadtreeID i=node.first;i!=Null;)
+            {
+                QuadtreeID next = m_nodes[i].next;
+                deallocate(i);
+                i = next;
+            }
+            /*
             deallocate(node.northwest);
             deallocate(node.northeast);
             deallocate(node.southwest);
             deallocate(node.southeast);
+            */
         }
 
+        if (node.parent != Null)
+        {
+            QuadTreeNode &parent = m_nodes[node.parent];
+            if (parent.first == id)
+                parent.first = node.next;
+            else
+                parent.next = node.next;
+        }
+        
+        node.first = Null;
         node.next = m_freeID;
         m_freeID = id;
-        /*
-        QuadtreeID lastIndex = m_count - 1;
-        if (id != lastIndex)
-        {
-            m_nodes[id] = m_nodes[lastIndex];
 
-            if (m_nodes[id].parent != Null)
-            {
-                QuadTreeNode &parent = m_nodes[m_nodes[id].parent];
-
-                if (parent.northwest == lastIndex)
-                    parent.northwest = id;
-                else if (parent.northeast == lastIndex)
-                    parent.northeast = id;
-                else if (parent.southwest == lastIndex)
-                    parent.southwest = id;
-                else if (parent.southeast == lastIndex)
-                    parent.southeast = id;
-            }
-
-            if (m_nodes[id].divided)
-            {
-                m_nodes[m_nodes[id].northwest].parent = id;
-                m_nodes[m_nodes[id].northeast].parent = id;
-                m_nodes[m_nodes[id].southwest].parent = id;
-                m_nodes[m_nodes[id].southeast].parent = id;
-            }
-        }
-
-        m_nodes[lastIndex].next = m_freeID;
-        m_freeID = lastIndex;
-
-        std::memset(&m_nodes[lastIndex], 0, sizeof(QuadTreeNode));
-        */
         m_count--;
     }
 
-    bool Insert(QuadtreeID id, Player *player)
+    bool Insert(QuadtreeID id, Player *player, int depth = 0)
     {
         QuadTreeNode *node = m_nodes + id;
         if (!node->boundary.contains(player->position))
@@ -303,14 +282,21 @@ public:
                 node = m_nodes + id;
             }
 
-            if (Insert(node->northeast, player))
+            for (QuadtreeID i=node->first;i!=Null;i=m_nodes[i].next)
+            {
+                if (Insert(i, player))
+                    return true;
+            }
+            /*
+            if (Insert(node->northeast, player, depth + 1))
                 return true;
-            else if (Insert(node->northwest, player))
+            if (Insert(node->northwest, player, depth + 1))
                 return true;
-            else if (Insert(node->southeast, player))
+            if (Insert(node->southeast, player, depth + 1))
                 return true;
-            else if (Insert(node->southwest, player))
+            if (Insert(node->southwest, player, depth + 1))
                 return true;
+            */
         }
         return false;
     }
@@ -318,14 +304,16 @@ public:
     bool remove(QuadtreeID id, Player *player)
     {
         QuadTreeNode &node = m_nodes[id];
-
-        for (QuadtreeID i={};i<node.size;i++)
+        
+        auto count = node.size;
+        for (QuadtreeID i={};i<count;i++)
         {
             Player *p = (Player *)node.data[i];
             if (p == player)
             {
                 node.data[i] = node.data[node.size - 1];
                 node.data[node.size - 1] = nullptr;
+
                 node.size--;
                 return true;
             }
@@ -333,14 +321,21 @@ public:
 
         if (node.divided)
         {
+            for (QuadtreeID i=node.first;i!=Null;i=m_nodes[i].next)
+            {
+                if (remove(i, player))
+                    return check(id);
+            }
+            /*
             if (remove(node.northwest, player))
-                return check(id);
-            else if (remove(node.northeast, player))
-                return check(id);
-            else if (remove(node.southwest, player))
-                return check(id);
-            else if (remove(node.southeast, player))
-                return check(id);
+                return check(node);
+            if (remove(node.northeast, player))
+                return check(node);
+            if (remove(node.southwest, player))
+                return check(node);
+            if (remove(node.southeast, player))
+                return check(node);
+            */
         }
 
         return false;
@@ -348,15 +343,33 @@ public:
 
     bool check(QuadtreeID id)
     {
-        QuadTreeNode &node = m_nodes[id];
-
-        tryCollapse(node);
+        tryCollapse(id);
 
         return true;
     }
 
-    void tryCollapse(QuadTreeNode &node)
+    void tryCollapse(QuadtreeID id)
     {
+        QuadTreeNode &node = m_nodes[id];
+        if (!node.divided)
+            return;
+
+        for (QuadtreeID i=node.first;i!=Null;i=m_nodes[i].next)
+        {
+            if (!empty(i))
+                return;
+        }
+
+        for (QuadtreeID i=node.first;i!=Null;)
+        {
+            QuadtreeID next = m_nodes[i].next;
+            deallocate(i);
+            i = next;
+        }
+
+        node.divided = false;
+
+        /*
         if (node.divided &&
             empty(node.northeast) &&
             empty(node.northwest) &&
@@ -364,23 +377,20 @@ public:
             empty(node.southwest))
         {
             deallocate(node.northeast);
-            
             deallocate(node.northwest);
-
             deallocate(node.southeast);
-            
             deallocate(node.southwest);
 
             node.divided = false;
         }
+        */
     }
 
     void update(QuadtreeID id, QuadtreeID root, float dt)
     {
         QuadTreeNode *node = m_nodes + id;
-
-        std::vector<Player *> players;
         
+        std::vector<Player *> players;
         auto temp = node->size;
         for (QuadtreeID i={};i<temp;i++)
         {
@@ -393,28 +403,35 @@ public:
                 if (remove(id, player))
                 {
                     players.push_back(player);
-                    // if (Insert(root, player))
-                    {
-
-                    }
                 }
             }
         }
 
         for (auto &player : players)
-            Insert(root, player);
+        {
+            QuadtreeID parent = m_nodes[id].parent;
+            while (parent != Null && !m_nodes[parent].boundary.contains(player->position))
+                parent = m_nodes[parent].parent;
 
-
-        node = m_nodes + id;
+            if (Insert(parent == Null ? root : parent, player))
+            {
+                node = m_nodes + id;
+            }
+        }
 
         if (node->divided)
         {
+            for (QuadtreeID i=node->first;i!=Null;i=m_nodes[i].next)
+            {
+                update(i, root, dt);
+            }
+            /*
             update(node->northeast, root, dt);
             update(node->northwest, root, dt);
             update(node->southeast, root, dt);
             update(node->southwest, root, dt);
-
-            tryCollapse(*node);
+            */
+            tryCollapse(id);
         }
     }
 
@@ -427,10 +444,13 @@ public:
         if (!node.divided)
             return true;
 
+        return true;
+        /*
         return empty(node.northeast) &&
             empty(node.northwest) &&
             empty(node.southeast) &&
             empty(node.southwest);
+        */
     }
 
     void subdivide(QuadtreeID id)
@@ -458,11 +478,33 @@ public:
         assert(southwest != Null && "Invalid Create southwest");
 
         QuadTreeNode &node = m_nodes[id];
+        emplace(id, northwest);
+        emplace(id, northeast);
+        emplace(id, southwest);
+        emplace(id, southeast);
+        /*
         node.northwest = northwest;
         node.northeast = northeast;
         node.southwest = southwest;
         node.southeast = southeast;
+        */
         node.divided = true;
+    }
+
+    void emplace(QuadtreeID id, QuadtreeID child)
+    {
+        QuadTreeNode &node = m_nodes[id];
+        if (node.first == Null)
+        {
+            node.first = child;
+        } else
+        {
+            QuadtreeID sibling = node.first;
+            while (m_nodes[sibling].next != Null)
+                sibling = m_nodes[sibling].next;
+
+            m_nodes[sibling].next = child;
+        }
     }
 
     void renderer(SDL_Renderer *renderer, Rect *bounds, QuadtreeID root)
@@ -507,10 +549,16 @@ public:
 
         if (node.divided)
         {
+            for (QuadtreeID i=node.first;i!=Null;i=m_nodes[i].next)
+            {
+                render(renderer, bounds, m_nodes[i]);
+            }
+            /*
             render(renderer, bounds, m_nodes[node.northeast]);
             render(renderer, bounds, m_nodes[node.northwest]);
             render(renderer, bounds, m_nodes[node.southeast]);
             render(renderer, bounds, m_nodes[node.southwest]);
+            */
         }
     }
 
@@ -531,10 +579,14 @@ public:
 
             if (node.divided)
             {
+                for (QuadtreeID i=node.first;i!=Null;i=m_nodes[i].next)
+                    query(i, range, found);
+                /*
                 query(node.northwest, range, found);
                 query(node.northeast, range, found);
                 query(node.southwest, range, found);
                 query(node.southeast, range, found);
+                */
             }
         }
         return true;
@@ -546,12 +598,11 @@ public:
 int main()
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        std::cerr << "Erro ao iniciar SDL: " << SDL_GetError() << std::endl;
         return 1;
     }
 
     SDL_Window* window = SDL_CreateWindow(
-        "SDL2 + Loop ESC para sair",
+        "gr-quadtree",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         WINDOW_WIDTH, WINDOW_HEIGTH,
@@ -559,14 +610,12 @@ int main()
     );
 
     if (!window) {
-        std::cerr << "Erro ao criar janela: " << SDL_GetError() << std::endl;
         SDL_Quit();
         return 1;
     }
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
-        std::cerr << "Erro ao criar renderer: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
@@ -578,15 +627,17 @@ int main()
     QuadTreeManager s_QuadTreeManager(1024, 4);
 
     QuadtreeID root = s_QuadTreeManager.Create(Rect{WINDOW_WIDTH / 2.0f, WINDOW_HEIGTH / 2.0f, WINDOW_WIDTH / 2.0f, WINDOW_HEIGTH / 2.0f}, 4);
-
-    int playercount = 10000;
+    
+    std::vector<std::unique_ptr<Player>> playerlist;
+    
+    // /*
+    int playercount = 100000; // 100K
     
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.0f, (float)WINDOW_WIDTH);
     std::uniform_real_distribution<float> distY(0.0f, (float)WINDOW_HEIGTH);
 
-    std::vector<std::unique_ptr<Player>> playerlist; //(playercount);
     for (int i=0;i<playercount;i++)
     {
         auto &player = playerlist.emplace_back(std::make_unique<Player>());
@@ -595,6 +646,7 @@ int main()
 
         s_QuadTreeManager.Insert(root, player.get());
     }
+    // */
 
     int mouseX = 0, mouseY = 0;
     Uint32 lastTime = 0;
@@ -621,6 +673,22 @@ int main()
             {
                 mouseX = event.button.x;
                 mouseY = event.button.y;
+
+                if (event.button.button == SDL_BUTTON_LEFT)
+                {
+                    int mouseX = event.button.x;
+                    int mouseY = event.button.y;
+
+                    Rect rect = {(float)mouseX, (float)mouseY, 50, 50};
+
+                    std::vector<fquery> found;
+                    s_QuadTreeManager.query(root, rect, found);
+
+                    for (auto &&[id, player] : found)
+                    {
+                        s_QuadTreeManager.remove(root, (Player *)player);
+                    }
+                }
             }
             else if (event.type == SDL_MOUSEBUTTONDOWN)
             {
@@ -638,28 +706,8 @@ int main()
                     player->position = point;
                     player->velocity = Vector2{0.6f, 0.6f};
 
-                    if (s_QuadTreeManager.Insert(root, player.get()))
+                    if (!s_QuadTreeManager.Insert(root, player.get()))
                     {
-                        // std::cout << "added: " << mouseX << ", " << mouseY << std::endl;
-                    } else
-                    {
-                        /*
-                        Rect boundary = s_QuadTree.get_boundary();
-                        float x = std::min(boundary.x, point.x);
-                        float y = std::min(boundary.y, point.y);
-
-                        float w = std::abs(point.x - boundary.x);
-                        float h = std::abs(point.y - boundary.y);
-
-                        float diff = std::abs(w - h);
-
-                        boundary.w = std::max(boundary.w, diff) * 1.2f;
-                        boundary.h = std::max(boundary.h, diff) * 1.2f;
-
-                        s_QuadTree.set_boundary(boundary);
-
-                        s_QuadTree.insert(point);
-                        */
                     }
                 }
                 if (event.button.button == SDL_BUTTON_LEFT)
