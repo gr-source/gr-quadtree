@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/felipy/Documentos/gr-projects/gr-quadtree/build",
+  "command": "/usr/bin/c++  -isystem /usr/include/SDL2 -g -o CMakeFiles/gr-quadtree.dir/main.cpp.o -c /home/felipy/Documentos/gr-projects/gr-quadtree/main.cpp",
+  "file": "/home/felipy/Documentos/gr-projects/gr-quadtree/main.cpp",
+  "output": "CMakeFiles/gr-quadtree.dir/main.cpp.o"
+}
+]

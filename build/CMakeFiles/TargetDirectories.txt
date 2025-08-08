@@ -1,0 +1,3 @@
+/home/felipy/Documentos/gr-projects/gr-quadtree/build/CMakeFiles/gr-quadtree.dir
+/home/felipy/Documentos/gr-projects/gr-quadtree/build/CMakeFiles/edit_cache.dir
+/home/felipy/Documentos/gr-projects/gr-quadtree/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/gr-quadtree.dir/link.d "CMakeFiles/gr-quadtree.dir/main.cpp.o" -o /home/felipy/Documentos/gr-projects/gr-quadtree/bin/gr-quadtree  /usr/lib/libSDL2main.a /usr/lib/libSDL2-2.0.so.0.3200.56
