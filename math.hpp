@@ -43,6 +43,13 @@ typedef struct Rect
     }
     */
 
+
+    float left()   const { return x; }
+    float right()  const { return x + w; }
+    float top()    const { return y; }
+    float bottom() const { return y + h; }
+
+    /*
     bool intersects(const Rect &range) const
     {
         return !(range.x - range.w > x + w ||
@@ -50,5 +57,15 @@ typedef struct Rect
             range.y - range.h > y + h ||
             range.y + range.h < y - h);
     }
+    */
+
+    bool intersects(const Rect& other) const
+    {
+        return !(right()  < other.left()   ||
+                 left()   > other.right()  ||
+                 bottom() < other.top()    ||
+                top()    > other.bottom());
+    }
+     
 } Rect;
 

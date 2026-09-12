@@ -234,30 +234,40 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: \
  /usr/include/SDL2/SDL_version.h /usr/include/SDL2/SDL_locale.h \
  /usr/include/SDL2/SDL_misc.h /usr/include/SDL2/SDL_render.h \
  /usr/include/c++/16/cassert /usr/include/assert.h \
- /usr/include/c++/16/cstddef /usr/include/c++/16/memory \
- /usr/include/c++/16/bits/memoryfwd.h \
+ /usr/include/c++/16/cstddef /usr/include/c++/16/vector \
  /usr/include/c++/16/bits/allocator.h \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++allocator.h \
  /usr/include/c++/16/bits/new_allocator.h \
  /usr/include/c++/16/bits/new_throw.h \
- /usr/include/c++/16/bits/stl_tempbuf.h \
+ /usr/include/c++/16/bits/memoryfwd.h \
  /usr/include/c++/16/bits/stl_uninitialized.h \
  /usr/include/c++/16/ext/alloc_traits.h \
  /usr/include/c++/16/bits/alloc_traits.h \
- /usr/include/c++/16/bits/stl_raw_storage_iter.h \
- /usr/include/c++/16/bits/align.h \
- /usr/include/c++/16/bits/uses_allocator.h \
- /usr/include/c++/16/bits/unique_ptr.h /usr/include/c++/16/tuple \
- /usr/include/c++/16/bits/invoke.h /usr/include/c++/16/bits/ranges_util.h \
- /usr/include/c++/16/bits/ranges_base.h \
+ /usr/include/c++/16/bits/stl_vector.h \
  /usr/include/c++/16/initializer_list \
+ /usr/include/c++/16/bits/ranges_base.h \
  /usr/include/c++/16/bits/max_size_type.h /usr/include/c++/16/numbers \
+ /usr/include/c++/16/bits/stl_bvector.h \
  /usr/include/c++/16/bits/functional_hash.h \
- /usr/include/c++/16/bits/hash_bytes.h /usr/include/c++/16/bits/ostream.h \
- /usr/include/c++/16/ios /usr/include/c++/16/iosfwd \
- /usr/include/c++/16/bits/stringfwd.h /usr/include/c++/16/bits/postypes.h \
- /usr/include/c++/16/cwchar /usr/include/c++/16/exception \
- /usr/include/c++/16/bits/exception_ptr.h \
+ /usr/include/c++/16/bits/hash_bytes.h \
+ /usr/include/c++/16/bits/range_access.h \
+ /usr/include/c++/16/bits/erase_if.h /usr/include/c++/16/bits/vector.tcc \
+ /usr/include/c++/16/bits/memory_resource.h \
+ /usr/include/c++/16/bits/uses_allocator.h \
+ /usr/include/c++/16/bits/uses_allocator_args.h /usr/include/c++/16/tuple \
+ /usr/include/c++/16/bits/invoke.h /usr/include/c++/16/bits/ranges_util.h \
+ /home/NoirVoid/Documentos/gr-quadtree/math.hpp \
+ /home/NoirVoid/Documentos/gr-quadtree/player.hpp \
+ /home/NoirVoid/Documentos/gr-quadtree/default.hpp \
+ /usr/include/c++/16/cstdint \
+ /home/NoirVoid/Documentos/gr-quadtree/sparseSet.hpp \
+ /usr/include/c++/16/cstring /usr/include/c++/16/utility \
+ /usr/include/c++/16/bits/stl_relops.h /usr/include/c++/16/bits/intcmp.h \
+ /usr/include/c++/16/iostream /usr/include/c++/16/ostream \
+ /usr/include/c++/16/bits/ostream.h /usr/include/c++/16/ios \
+ /usr/include/c++/16/iosfwd /usr/include/c++/16/bits/stringfwd.h \
+ /usr/include/c++/16/bits/postypes.h /usr/include/c++/16/cwchar \
+ /usr/include/c++/16/exception /usr/include/c++/16/bits/exception_ptr.h \
  /usr/include/c++/16/bits/cxxabi_init_exception.h \
  /usr/include/c++/16/typeinfo /usr/include/c++/16/bits/nested_exception.h \
  /usr/include/c++/16/bits/char_traits.h \
@@ -286,8 +296,6 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: \
  /usr/include/c++/16/bits/functexcept.h /usr/include/c++/16/string \
  /usr/include/c++/16/bits/ostream_insert.h \
  /usr/include/c++/16/bits/cxxabi_forced.h \
- /usr/include/c++/16/bits/range_access.h \
- /usr/include/c++/16/bits/erase_if.h \
  /usr/include/c++/16/bits/basic_string.h /usr/include/c++/16/string_view \
  /usr/include/c++/16/bits/string_view.tcc \
  /usr/include/c++/16/ext/string_conversions.h /usr/include/c++/16/cstdio \
@@ -297,8 +305,6 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: \
  /usr/include/asm-generic/errno-base.h /usr/include/bits/types/error_t.h \
  /usr/include/c++/16/bits/charconv.h \
  /usr/include/c++/16/bits/basic_string.tcc \
- /usr/include/c++/16/bits/memory_resource.h \
- /usr/include/c++/16/bits/uses_allocator_args.h \
  /usr/include/c++/16/bits/locale_classes.tcc \
  /usr/include/c++/16/system_error \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/error_constants.h \
@@ -313,32 +319,6 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/ctype_inline.h \
  /usr/include/c++/16/bits/locale_facets.tcc \
  /usr/include/c++/16/bits/basic_ios.tcc \
- /usr/include/c++/16/bits/shared_ptr.h \
- /usr/include/c++/16/bits/shared_ptr_base.h \
- /usr/include/c++/16/bits/allocated_ptr.h \
- /usr/include/c++/16/bits/refwrap.h \
- /usr/include/c++/16/ext/aligned_buffer.h \
- /usr/include/c++/16/ext/concurrence.h \
- /usr/include/c++/16/bits/shared_ptr_atomic.h \
- /usr/include/c++/16/bits/atomic_base.h \
- /usr/include/c++/16/bits/atomic_lockfree_defines.h \
- /usr/include/c++/16/bits/atomic_wait.h \
- /usr/include/c++/16/backward/auto_ptr.h \
- /usr/include/c++/16/bits/ranges_uninitialized.h \
- /usr/include/c++/16/bits/ranges_algobase.h \
- /usr/include/c++/16/pstl/glue_memory_defs.h \
- /usr/include/c++/16/pstl/execution_defs.h /usr/include/c++/16/vector \
- /usr/include/c++/16/bits/stl_vector.h \
- /usr/include/c++/16/bits/stl_bvector.h \
- /usr/include/c++/16/bits/vector.tcc \
- /home/NoirVoid/Documentos/gr-quadtree/math.hpp \
- /home/NoirVoid/Documentos/gr-quadtree/player.hpp \
- /home/NoirVoid/Documentos/gr-quadtree/default.hpp \
- /usr/include/c++/16/cstdint \
- /home/NoirVoid/Documentos/gr-quadtree/sparseSet.hpp \
- /usr/include/c++/16/cstring /usr/include/c++/16/utility \
- /usr/include/c++/16/bits/stl_relops.h /usr/include/c++/16/bits/intcmp.h \
- /usr/include/c++/16/iostream /usr/include/c++/16/ostream \
  /usr/include/c++/16/bits/ostream_print.h \
  /usr/include/c++/16/bits/ostream.tcc /usr/include/c++/16/istream \
  /usr/include/c++/16/bits/istream.tcc /usr/include/c++/16/random \
@@ -347,4 +327,5 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/opt_random.h \
  /usr/include/c++/16/bits/random.tcc /usr/include/c++/16/numeric \
  /usr/include/c++/16/bits/stl_numeric.h \
- /usr/include/c++/16/pstl/glue_numeric_defs.h
+ /usr/include/c++/16/pstl/glue_numeric_defs.h \
+ /usr/include/c++/16/pstl/execution_defs.h
