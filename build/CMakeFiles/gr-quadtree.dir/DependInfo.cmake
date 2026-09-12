@@ -8,8 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/felipy/Documentos/gr-projects/gr-quadtree/main.cpp" "CMakeFiles/gr-quadtree.dir/main.cpp.o" "gcc" "CMakeFiles/gr-quadtree.dir/main.cpp.o.d"
-  "" "/home/felipy/Documentos/gr-projects/gr-quadtree/bin/gr-quadtree" "gcc" "CMakeFiles/gr-quadtree.dir/link.d"
+  "/home/NoirVoid/Documentos/gr-quadtree/main.cpp" "CMakeFiles/gr-quadtree.dir/main.cpp.o" "gcc" "CMakeFiles/gr-quadtree.dir/main.cpp.o.d"
+  "/home/NoirVoid/Documentos/gr-quadtree/player.cpp" "CMakeFiles/gr-quadtree.dir/player.cpp.o" "gcc" "CMakeFiles/gr-quadtree.dir/player.cpp.o.d"
+  "" "/home/NoirVoid/Documentos/gr-quadtree/bin/gr-quadtree" "gcc" "CMakeFiles/gr-quadtree.dir/link.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

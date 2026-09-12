@@ -1,222 +1,72 @@
 #include <SDL2/SDL.h>
 #include <SDL_render.h>
 
-#include <alloca.h>
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
-#include <cstring>
-#include <iostream>
 #include <memory>
-#include <oneapi/tbb/info.h>
-#include <ostream>
 #include <vector>
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGTH 600
+#include "math.hpp"
+#include "player.hpp"
 
-typedef struct Vector2
+#include "sparseSet.hpp"
+
+#include <iostream>
+
+#define MAX_PLAYERS 0
+
+#define MAX_NODE_ITENS 10
+
+struct QuadTreeNode
 {
-    union
-    {
-        struct
-        {
-            float x;
-            float y;
-        };
-        float value[2];
-    };
-} Vector2;
+    QuadtreeID parent =
+        INVALID_QUADTREEID;
 
-typedef struct Rect
-{
-    union
-    {
-        struct
-        {
-            float x;
-            float y;
-            float w;
-            float h;
-        };
-        float data[4];
-    };
+    QuadtreeID first =
+        INVALID_QUADTREEID;
+    QuadtreeID next =
+        INVALID_QUADTREEID;
 
-    // center-based
-    bool contains(const Vector2 &point) const
-    {
-        return (point.x >= x - w && point.x  < x + w &&
-                point.y >= y - h && point.y  < y + h);
-    }
-    
-    /*
-    // corner-based
-    bool contains(const Vector2& point) const
-    {
-        return (point.x >= x && point.x <= x + w &&
-                point.y >= y && point.y <= y + h);
-    }
-    */
-
-    bool intersects(const Rect &range) const
-    {
-        return !(range.x - range.w > x + w ||
-            range.x + range.w < x - w ||
-            range.y - range.h > y + h ||
-            range.y + range.h < y - h);
-    }
-} Rect;
-
-using QuadtreeID = std::size_t;
-
-constexpr QuadtreeID Null = std::numeric_limits<QuadtreeID>::max();
-
-typedef struct Player
-{
-    Vector2 position;
-    Vector2 velocity;
-
-    QuadtreeID id;
-
-    void update(float dt)
-    {
-        position.x += velocity.x * dt;
-        position.y += velocity.y * dt;
-
-        if (position.x < 0) {
-            position.x = 0;
-            velocity.x *= -1;
-        }
-        else if (position.x > WINDOW_WIDTH - 2) {
-            position.x = WINDOW_WIDTH - 2;
-            velocity.x *= -1;
-        }
-
-        if (position.y < 0) {
-            position.y = 0;
-            velocity.y *= -1;
-        }
-        else if (position.y > WINDOW_HEIGTH - 2) {
-            position.y = WINDOW_HEIGTH - 2;
-            velocity.y *= -1;
-        }
-    }
-} Player;
-
-typedef struct QuadTreeNode
-{
-    QuadtreeID parent;
-    
-    /*
-    QuadtreeID northwest;
-    QuadtreeID northeast;
-    QuadtreeID southwest;
-    QuadtreeID southeast;
-    */
-
-    QuadtreeID first;
-    QuadtreeID next;
-
-    void *data[10];
-    std::size_t size;
+    PlayerID data[MAX_NODE_ITENS];
+    size_t count = 0;
 
     Rect boundary;
 
-    bool divided;
-} QuadTreeNode;
-
-template <typename T>
-struct vector
-{
-    T *values;
-
-    std::size_t count;
+    bool divided = false;
 };
 
-typedef struct fquery
+struct fquery
 {
     QuadtreeID id;
     void *data;
-} fquery;
+};
 
 class QuadTreeManager
 {
 public:
-    QuadTreeNode *m_nodes;
-
-    std::size_t m_size;
-
-    QuadtreeID m_count;
-
-    QuadtreeID m_freeID;
-
-    std::size_t m_capacity;
-
-    QuadTreeManager(std::size_t size, std::size_t capacity) : m_nodes(nullptr), m_count(0), m_size(size), m_freeID(Null), m_capacity(capacity)
-    {
-        m_nodes = (QuadTreeNode *)std::calloc(size, sizeof(QuadTreeNode));
-
-        addfree(0);
-    }
-
     ~QuadTreeManager()
     {
-        std::free(m_nodes);
+        if (m_freeList != nullptr)
+            free(m_freeList);
+
+        if (m_nodes != nullptr)
+            free(m_nodes);
     }
 
-    void addfree(QuadtreeID id)
+    QuadtreeID Create(const Rect &boundary, QuadtreeID parent = INVALID_QUADTREEID)
     {
-        for (QuadtreeID i = id; i < m_size - 1; i++)
-        {
-            m_nodes[i].next = i + 1;
-        }
-
-        m_nodes[m_size - 1].next = m_freeID;
-        m_freeID = id;
-    }
-
-    void allocate()
-    {
-        std::size_t ooldsize = m_size;
-        std::size_t newsize = m_size * 2;
-
-        QuadTreeNode *array = (QuadTreeNode *)std::malloc(sizeof(QuadTreeNode) * newsize);
-        if (!array)
-        {
-            std::cerr << "Erro: malloc falhou\n";
-            std::abort();
-        }
-
-        std::memcpy(array, m_nodes, sizeof(QuadTreeNode) * ooldsize);
-        std::free(m_nodes);
-
-        m_size = newsize;
-
-        m_nodes = array;
-
-        addfree(ooldsize);
-    }
-
-    QuadtreeID Create(const Rect &boundary, QuadtreeID parent = Null)
-    {
-        if (m_freeID == Null)
-        {
-            allocate();
-        }
+        if (m_freeID == INVALID_QUADTREEID)
+            grow();
 
         QuadtreeID id = m_freeID;
-        m_freeID = m_nodes[id].next;
+        m_freeID = m_freeList[id];
 
-        QuadTreeNode &node = m_nodes[id];
-        node.parent = parent;
-        node.divided = false;
-        node.boundary = boundary;
-        node.first = Null;
-        node.next = Null;
-        node.size = 0;
+        QuadTreeNode* node = m_nodes + id;
+        new (node) QuadTreeNode();
 
-        for (int i=0;i<m_capacity;i++)
-            node.data[i] = nullptr;
+        node->parent = parent;
+        node->boundary = boundary;
 
         m_count++;
 
@@ -229,7 +79,7 @@ public:
 
         if (node.divided)
         {
-            for (QuadtreeID i=node.first;i!=Null;)
+            for (QuadtreeID i=node.first;i!=INVALID_QUADTREEID;)
             {
                 QuadtreeID next = m_nodes[i].next;
                 deallocate(i);
@@ -243,7 +93,7 @@ public:
             */
         }
 
-        if (node.parent != Null)
+        if (node.parent != INVALID_QUADTREEID)
         {
             QuadTreeNode &parent = m_nodes[node.parent];
             if (parent.first == id)
@@ -251,28 +101,30 @@ public:
             else
                 parent.next = node.next;
         }
-        
-        node.first = Null;
+
+        m_freeList[id] = m_freeID;
+        m_freeID = id;
+
+        /*
+        node.first = INVALID_QUADTREEID;
         node.next = m_freeID;
         m_freeID = id;
+        */
 
         m_count--;
     }
 
-    bool Insert(QuadtreeID id, Player *player, int depth = 0)
+    QuadtreeID Insert(QuadtreeID id, const Vector2& point, PlayerID playerID)
     {
         QuadTreeNode *node = m_nodes + id;
-        if (!node->boundary.contains(player->position))
-            return false;
+        if (!node->boundary.contains(point))
+            return INVALID_QUADTREEID;
 
-        if (node->size < m_capacity)
+        if (node->count < MAX_NODE_ITENS)
         {
-            auto index = node->size;
-
-            node->data[index] = player;
-            player->id = id;
-            node->size++;
-            return true;
+            node->data[node->count++] = playerID;
+            // player->id = id;
+            return id;
         } else
         {
             if (!node->divided)
@@ -282,10 +134,12 @@ public:
                 node = m_nodes + id;
             }
 
-            for (QuadtreeID i=node->first;i!=Null;i=m_nodes[i].next)
+            for (QuadtreeID i=node->first;i!=INVALID_QUADTREEID;i=m_nodes[i].next)
             {
-                if (Insert(i, player))
-                    return true;
+                QuadtreeID result =
+                    Insert(i, point, playerID);
+                if (result != INVALID_QUADTREEID)
+                    return result;
             }
             /*
             if (Insert(node->northeast, player, depth + 1))
@@ -298,32 +152,32 @@ public:
                 return true;
             */
         }
-        return false;
+        return INVALID_QUADTREEID;
     }
 
-    bool remove(QuadtreeID id, Player *player)
+    bool remove(QuadtreeID id, PlayerID playerID)
     {
         QuadTreeNode &node = m_nodes[id];
         
-        auto count = node.size;
-        for (QuadtreeID i={};i<count;i++)
+        for (size_t i={};i<node.count;i++)
         {
-            Player *p = (Player *)node.data[i];
-            if (p == player)
+            PlayerID index =
+                node.data[i];
+            if (index == playerID)
             {
-                node.data[i] = node.data[node.size - 1];
-                node.data[node.size - 1] = nullptr;
+                node.data[i] = node.data[node.count - 1];
+                node.data[node.count - 1] = INVALID_PLAYERID;
 
-                node.size--;
+                node.count--;
                 return true;
             }
         }
 
         if (node.divided)
         {
-            for (QuadtreeID i=node.first;i!=Null;i=m_nodes[i].next)
+            for (QuadtreeID i=node.first;i!=INVALID_QUADTREEID;i=m_nodes[i].next)
             {
-                if (remove(i, player))
+                if (remove(i, playerID))
                     return check(id);
             }
             /*
@@ -354,13 +208,13 @@ public:
         if (!node.divided)
             return;
 
-        for (QuadtreeID i=node.first;i!=Null;i=m_nodes[i].next)
+        for (QuadtreeID i=node.first;i!=INVALID_QUADTREEID;i=m_nodes[i].next)
         {
             if (!empty(i))
                 return;
         }
 
-        for (QuadtreeID i=node.first;i!=Null;)
+        for (QuadtreeID i=node.first;i!=INVALID_QUADTREEID;)
         {
             QuadtreeID next = m_nodes[i].next;
             deallocate(i);
@@ -386,59 +240,41 @@ public:
         */
     }
 
-    void update(QuadtreeID id, QuadtreeID root, float dt)
+    bool Sync(QuadtreeID id, const Vector2& point, PlayerID playerID)
     {
-        QuadTreeNode *node = m_nodes + id;
-        
-        std::vector<Player *> players;
-        auto temp = node->size;
-        for (QuadtreeID i={};i<temp;i++)
-        {
-            Player *player = (Player *)node->data[i];
-            if (player == nullptr)
-                continue;
+        assert(m_capacity > id);
 
-            if (!node->boundary.contains(player->position))
+        QuadTreeNode& node =
+            m_nodes[id];
+
+        if (node.boundary.contains(point))
+            return false;
+
+        for (size_t i=0;i<node.count;i++)
+        {
+            if (node.data[i] == playerID)
             {
-                if (remove(id, player))
+                size_t last = node.count - 1;
+                if (i != last)
                 {
-                    players.push_back(player);
+                    node.data[i] = node.data[last];
                 }
+                node.count--;
+                break;
             }
         }
 
-        for (auto &player : players)
+        if (!node.count)
         {
-            QuadtreeID parent = m_nodes[id].parent;
-            while (parent != Null && !m_nodes[parent].boundary.contains(player->position))
-                parent = m_nodes[parent].parent;
-
-            if (Insert(parent == Null ? root : parent, player))
-            {
-                node = m_nodes + id;
-            }
         }
 
-        if (node->divided)
-        {
-            for (QuadtreeID i=node->first;i!=Null;i=m_nodes[i].next)
-            {
-                update(i, root, dt);
-            }
-            /*
-            update(node->northeast, root, dt);
-            update(node->northwest, root, dt);
-            update(node->southeast, root, dt);
-            update(node->southwest, root, dt);
-            */
-            tryCollapse(id);
-        }
+        return true;
     }
 
     bool empty(QuadtreeID id)
     {
         QuadTreeNode &node = m_nodes[id];
-        if (node.size > 0)
+        if (node.count > 0)
             return false;
 
         if (!node.divided)
@@ -453,6 +289,86 @@ public:
         */
     }
 
+    void emplace(QuadtreeID id, QuadtreeID child)
+    {
+        QuadTreeNode &node = m_nodes[id];
+        if (node.first == INVALID_QUADTREEID)
+        {
+            node.first = child;
+        } else
+        {
+            QuadtreeID sibling = node.first;
+            while (m_nodes[sibling].next != INVALID_QUADTREEID)
+                sibling = m_nodes[sibling].next;
+
+            m_nodes[sibling].next = child;
+        }
+    }
+
+    void renderer(SDL_Renderer *context, QuadtreeID root)
+    {
+        QuadTreeNode& node = m_nodes[root];
+
+        Rect boundary = node.boundary;
+
+        SDL_SetRenderDrawColor(context, 255, 0, 0, 255);
+        SDL_Rect rect = {
+            static_cast<int>(boundary.x - boundary.w),
+            static_cast<int>(boundary.y - boundary.h),
+            static_cast<int>(boundary.w * 2),
+            static_cast<int>(boundary.h * 2)
+        };
+        SDL_RenderDrawRect(context, &rect);
+
+        if (node.divided)
+        {
+            for (QuadtreeID id =node.first;id!=INVALID_QUADTREEID;id=m_nodes[id].next)
+                renderer(context, id);
+        }
+    }
+
+    bool query(QuadtreeID id, const Rect &range, std::vector<fquery> &found)
+    {
+        return false;
+        /*
+        QuadTreeNode &node = m_nodes[id];
+        if (!node.boundary.intersects(range))
+        {
+            return false;
+        } else {
+            for (std::size_t i={};i<node.count;i++)
+            {
+                Player *player = (Player *)node.data[i];
+
+                if (range.contains(player->position))
+                    found.push_back({id, (void *)player});
+            }
+
+            if (node.divided)
+            {
+                for (QuadtreeID i=node.first;i!=INVALID_QUADTREEID;i=m_nodes[i].next)
+                    query(i, range, found);
+            }
+        }
+        return true;
+        */
+    }
+
+private:
+    QuadTreeNode *m_nodes =
+        nullptr;
+
+    size_t m_capacity =
+        0;
+
+    size_t m_count = 0;
+
+    QuadtreeID* m_freeList =
+        nullptr;
+
+    QuadtreeID m_freeID =
+        INVALID_QUADTREEID;
+
     void subdivide(QuadtreeID id)
     {
         Rect boundary = m_nodes[id].boundary;
@@ -463,19 +379,19 @@ public:
 
         Rect ne = {x + w / 2, y - h / 2, w / 2, h / 2};
         QuadtreeID northeast = Create(ne, id);
-        assert(northeast != Null && "Invalid Create northeast");
+        assert(northeast != INVALID_QUADTREEID && "Invalid Create northeast");
 
         Rect nw = {x - w / 2, y - h / 2, w / 2, h / 2};
         QuadtreeID northwest = Create(nw, id);
-        assert(northwest != Null && "Invalid Create northwest");
+        assert(northwest != INVALID_QUADTREEID && "Invalid Create northwest");
 
         Rect se = {x + w / 2, y + h / 2, w / 2, h / 2};
         QuadtreeID southeast = Create(se, id);
-        assert(southeast != Null && "Invalid Create southeast");
+        assert(southeast != INVALID_QUADTREEID && "Invalid Create southeast");
 
         Rect sw = {x - w / 2, y + h / 2, w / 2, h / 2};
         QuadtreeID southwest = Create(sw, id);
-        assert(southwest != Null && "Invalid Create southwest");
+        assert(southwest != INVALID_QUADTREEID && "Invalid Create southwest");
 
         QuadTreeNode &node = m_nodes[id];
         emplace(id, northwest);
@@ -491,115 +407,48 @@ public:
         node.divided = true;
     }
 
-    void emplace(QuadtreeID id, QuadtreeID child)
+    void grow()
     {
-        QuadTreeNode &node = m_nodes[id];
-        if (node.first == Null)
-        {
-            node.first = child;
-        } else
-        {
-            QuadtreeID sibling = node.first;
-            while (m_nodes[sibling].next != Null)
-                sibling = m_nodes[sibling].next;
+        size_t oldCapacity = m_capacity;
 
-            m_nodes[sibling].next = child;
-        }
+        m_capacity = m_capacity > 0 ? m_capacity * 2 : 2;
+
+        m_nodes =
+            (QuadTreeNode *)realloc(m_nodes, sizeof(QuadTreeNode) * m_capacity);
+
+        m_freeList =
+            (QuadtreeID*)realloc(m_freeList, sizeof(QuadtreeID) * m_capacity);
+
+        addFreeList(oldCapacity);
     }
 
-    void renderer(SDL_Renderer *renderer, Rect *bounds, QuadtreeID root)
+    void addFreeList(size_t begin)
     {
-        return render(renderer, bounds, m_nodes[root]);
-    }
+        size_t end =
+            m_capacity - 1;
 
-    void render(SDL_Renderer *renderer, Rect *bounds, const QuadTreeNode &node)
-    {
-        Rect boundary = node.boundary;
+        for (size_t i = begin; i < end; i++)
+            m_freeList[i] =
+                static_cast<QuadtreeID>(i + 1);
 
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_Rect rect = {
-            static_cast<int>(boundary.x - boundary.w),
-            static_cast<int>(boundary.y - boundary.h),
-            static_cast<int>(boundary.w * 2),
-            static_cast<int>(boundary.h * 2)
-        };
-        SDL_RenderDrawRect(renderer, &rect);
-
-        int pointSize = 3;
-            
-        for (std::size_t j={};j<node.size;j++)
-        {
-            Player *player = (Player *)node.data[j];
-            if (player == nullptr)
-                continue;
-
-            if (bounds->contains(player->position))
-                SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-            else
-                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-
-            SDL_Rect pRect = {
-                static_cast<int>(player->position.x - static_cast<float>(pointSize) / 2),
-                static_cast<int>(player->position.y - static_cast<float>(pointSize) / 2),
-                pointSize,
-                pointSize
-            };
-            SDL_RenderFillRect(renderer, &pRect);
-        }
-
-        if (node.divided)
-        {
-            for (QuadtreeID i=node.first;i!=Null;i=m_nodes[i].next)
-            {
-                render(renderer, bounds, m_nodes[i]);
-            }
-            /*
-            render(renderer, bounds, m_nodes[node.northeast]);
-            render(renderer, bounds, m_nodes[node.northwest]);
-            render(renderer, bounds, m_nodes[node.southeast]);
-            render(renderer, bounds, m_nodes[node.southwest]);
-            */
-        }
-    }
-
-    bool query(QuadtreeID id, const Rect &range, std::vector<fquery> &found)
-    {
-        QuadTreeNode &node = m_nodes[id];
-        if (!node.boundary.intersects(range))
-        {
-            return false;
-        } else {
-            for (std::size_t i={};i<node.size;i++)
-            {
-                Player *player = (Player *)node.data[i];
-
-                if (range.contains(player->position))
-                    found.push_back({id, (void *)player});
-            }
-
-            if (node.divided)
-            {
-                for (QuadtreeID i=node.first;i!=Null;i=m_nodes[i].next)
-                    query(i, range, found);
-                /*
-                query(node.northwest, range, found);
-                query(node.northeast, range, found);
-                query(node.southwest, range, found);
-                query(node.southeast, range, found);
-                */
-            }
-        }
-        return true;
+        m_freeList[end] = m_freeID;
+        m_freeID = static_cast<QuadtreeID>(begin);
     }
 };
 
+void Player_Renderer(Player* player, SDL_Renderer* context)
+{
+    SDL_Rect rect = {(int)player->position.x - 5, (int)player->position.y - 5, 5 * 2, 5 * 2};
+
+    SDL_SetRenderDrawColor(context, 255, 0, 255, 255);
+    SDL_RenderFillRect(context, &rect);
+}
 
 #include <random>
 int main()
 {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
         return 1;
-    }
 
     SDL_Window* window = SDL_CreateWindow(
         "gr-quadtree",
@@ -609,42 +458,55 @@ int main()
         SDL_WINDOW_SHOWN
     );
 
-    if (!window) {
+    if (window == nullptr)
+    {
         SDL_Quit();
         return 1;
     }
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (!renderer) {
+    if (renderer == nullptr)
+    {
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
     }
 
+    SDL_GL_SetSwapInterval(1);
+
     bool running = true;
     SDL_Event event;
 
-    QuadTreeManager s_QuadTreeManager(1024, 4);
+    QuadTreeManager s_QuadTreeManager;
 
     QuadtreeID root = s_QuadTreeManager.Create(Rect{WINDOW_WIDTH / 2.0f, WINDOW_HEIGTH / 2.0f, WINDOW_WIDTH / 2.0f, WINDOW_HEIGTH / 2.0f}, 4);
+
+    SparseSet2<Player> playerList;
     
-    std::vector<std::unique_ptr<Player>> playerlist;
-    
-    // /*
-    int playercount = 100000; // 100K
+    // std::vector<std::unique_ptr<Player>> playerlist;
     
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.0f, (float)WINDOW_WIDTH);
     std::uniform_real_distribution<float> distY(0.0f, (float)WINDOW_HEIGTH);
 
-    for (int i=0;i<playercount;i++)
+    for (size_t i=0;i<MAX_PLAYERS;i++)
     {
-        auto &player = playerlist.emplace_back(std::make_unique<Player>());
-        player->position = Vector2{distX(gen), distY(gen)};
-        player->velocity = Vector2{0.6f, 0.6f};
+        Vector2 position =
+            { distX(gen), distY(gen) };
 
-        s_QuadTreeManager.Insert(root, player.get());
+        PlayerID playerID =
+            playerList.emplace(Player{
+                .position = position,
+                .velocity = { 64.0f, 64.0f }
+            });
+
+        QuadtreeID node =
+            s_QuadTreeManager.Insert(root, position, playerID);
+
+        auto& player =
+            playerList.get(playerID);
+        player.node = node;
     }
     // */
 
@@ -653,6 +515,8 @@ int main()
 
     int downMouseX = 0, downMouseY = 0;
     bool isMouseDown = false;
+
+    float fpsTimeCount = 0;
 
     while (running)
     {
@@ -679,6 +543,7 @@ int main()
                     int mouseX = event.button.x;
                     int mouseY = event.button.y;
 
+                    /*
                     Rect rect = {(float)mouseX, (float)mouseY, 50, 50};
 
                     std::vector<fquery> found;
@@ -688,6 +553,7 @@ int main()
                     {
                         s_QuadTreeManager.remove(root, (Player *)player);
                     }
+                    */
                 }
             }
             else if (event.type == SDL_MOUSEBUTTONDOWN)
@@ -699,22 +565,27 @@ int main()
 
                     isMouseDown = true;
 
-                    Vector2 point = {(float)downMouseX, (float)downMouseY};
+                    Vector2 position = {(float)downMouseX, (float)downMouseY};
 
+                    PlayerID playerID =
+                        playerList.emplace(Player{
+                            .position = position,
+                            .velocity = { 64.0f, 64.0f }
+                        });
 
-                    auto &player = playerlist.emplace_back(std::make_unique<Player>());
-                    player->position = point;
-                    player->velocity = Vector2{0.6f, 0.6f};
+                    QuadtreeID node =
+                        s_QuadTreeManager.Insert(root, position, playerID);
 
-                    if (!s_QuadTreeManager.Insert(root, player.get()))
-                    {
-                    }
+                    auto& player =
+                        playerList.get(playerID);
+                    player.node = node;
                 }
                 if (event.button.button == SDL_BUTTON_LEFT)
                 {
                     int mouseX = event.button.x;
                     int mouseY = event.button.y;
 
+                    /*
                     Rect rect = {(float)mouseX, (float)mouseY, 50, 50};
 
                     std::vector<fquery> found;
@@ -724,6 +595,7 @@ int main()
                     {
                         s_QuadTreeManager.remove(id, (Player *)player);
                     }
+                    */
                 }
             } 
             else if (event.type == SDL_MOUSEBUTTONUP)
@@ -736,30 +608,48 @@ int main()
         }
 
         Uint32 currentTime = SDL_GetTicks();
-        float deltaTime = (currentTime - lastTime) / 10.0f;
+        float deltaTime = (currentTime - lastTime) / 1000.0f;
         lastTime = currentTime;
 
-        for (auto &player : playerlist)
+        fpsTimeCount += deltaTime;
+        if (fpsTimeCount > 1.0f)
         {
-            player->update(deltaTime);
+            fpsTimeCount -= 1.0f;
+
+            std::cout << "FPS: " << (1.0f / deltaTime) << std::endl;
         }
 
-        s_QuadTreeManager.update(root, root, deltaTime);
+        Player* players =
+            playerList.data();
+
+        for (size_t i=0;i<playerList.count();i++)
+            Player_Update(players + i, deltaTime);
+
+        for (size_t i=0;i<playerList.count();i++)
+        {
+            Player& player =
+                players[i];
+
+            PlayerID playerID =
+                playerList.denseToSparse(i);
+
+            if (s_QuadTreeManager.Sync(player.node, player.position, playerID))
+            {
+                player.node =
+                    s_QuadTreeManager.Insert(root, player.position, playerID);
+            }
+        }
+
+        // s_QuadTreeManager.update(root, root, deltaTime);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        /*
-        for (auto &player : playerlist)
-        {
-            SDL_Rect rect = {(int)player.position.x - 5, (int)player.position.y - 5, 5 * 2, 5 * 2};
-            SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-            SDL_RenderFillRect(renderer, &rect);
-        }
-        */
+        for (size_t i=0;i<playerList.count();i++)
+            Player_Renderer(players + i, renderer);
 
-        Rect _rect = {(float)mouseX, (float)mouseY, 50, 50};
-        s_QuadTreeManager.renderer(renderer, (Rect *)&_rect, root);
+        // Rect _rect = {(float)mouseX, (float)mouseY, 50, 50};
+        s_QuadTreeManager.renderer(renderer, root);
         
         SDL_Rect rect = {mouseX - 50, mouseY - 50, 50 * 2, 50 * 2};
         SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
@@ -781,8 +671,6 @@ int main()
         */
 
         SDL_RenderPresent(renderer);
-
-        SDL_Delay(16);
     }
 
     SDL_DestroyRenderer(renderer);
