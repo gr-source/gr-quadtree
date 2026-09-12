@@ -2,7 +2,6 @@
 
 void Player_Update(Player* player, float dt)
 {
-    /*
     player->position.x += player->velocity.x * dt;
     player->position.y += player->velocity.y * dt;
 
@@ -27,6 +26,5 @@ void Player_Update(Player* player, float dt)
         // player->position.y = WINDOW_HEIGTH - 2;
         player->velocity.y *= -1;
     }
-    */
 }
 
