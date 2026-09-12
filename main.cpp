@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <memory>
 #include <vector>
 
 #include "math.hpp"
@@ -15,9 +16,10 @@
 
 #define MAX_PLAYERS 0
 
-static constexpr size_t MAX_DEPTH = 8;
-static constexpr size_t CAPACITY = 4;
+// static constexpr size_t MAX_DEPTH = 8;
+// static constexpr size_t CAPACITY = 4;
 
+/*
 struct QuadTreeNode
 {
     QuadtreeID parent =
@@ -181,28 +183,6 @@ public:
     bool query(QuadtreeID id, const Rect &range, std::vector<fquery> &found)
     {
         return false;
-        /*
-        QuadTreeNode &node = m_nodes[id];
-        if (!node.boundary.intersects(range))
-        {
-            return false;
-        } else {
-            for (std::size_t i={};i<node.count;i++)
-            {
-                Player *player = (Player *)node.data[i];
-
-                if (range.contains(player->position))
-                    found.push_back({id, (void *)player});
-            }
-
-            if (node.divided)
-            {
-                for (QuadtreeID i=node.first;i!=INVALID_QUADTREEID;i=m_nodes[i].next)
-                    query(i, range, found);
-            }
-        }
-        return true;
-        */
     }
 
 private:
@@ -317,6 +297,128 @@ private:
         m_freeID = static_cast<QuadtreeID>(begin);
     }
 };
+*/
+
+template <typename T, size_t MAX_DEPTH>
+class Quadtree
+{
+public:
+    Quadtree(const Rect& bounds, int depth) : m_boundary(bounds), m_depth(depth)
+    {
+        float halfWidth  = bounds.w / 2.0f;
+        float halfHeight = bounds.h / 2.0f;
+
+        float x = bounds.x;
+        float y = bounds.y;
+
+        // Top Left
+        m_childBoundary[0] =
+        {
+            x,
+            y,
+            halfWidth,
+            halfHeight
+        };
+
+        // Top Right
+        m_childBoundary[1] =
+        {
+            x + halfWidth,
+            y,
+            halfWidth,
+            halfHeight
+        };
+
+        // Bottom Left
+        m_childBoundary[2] =
+        {
+            x,
+            y + halfHeight,
+            halfWidth,
+            halfHeight
+        };
+
+        // Bottom Right
+        m_childBoundary[3] =
+        {
+            x + halfWidth,
+            y + halfHeight,
+            halfWidth,
+            halfHeight
+        };
+    }
+
+    void insert(const Rect& bounds, T object)
+    {
+        for (size_t i=0;i<4;i++)
+        {
+            if (m_childBoundary[i].contains(bounds))
+            {
+                if (m_depth + 1 < MAX_DEPTH)
+                {
+                    if (isLeaf())
+                        subdivide();
+
+                    m_children[i]->insert(bounds, object);
+
+                    return;
+                }
+            }
+        }
+
+        m_objects.push_back(object);
+    }
+
+    void draw(SDL_Renderer* context) const
+    {
+        SDL_SetRenderDrawColor(context, 255, 0, 0, 255);
+        SDL_FRect rect =
+        {
+            .x = m_boundary.x,
+            .y = m_boundary.y,
+            .w = m_boundary.w,
+            .h = m_boundary.h
+        };
+        SDL_RenderDrawRectF(context, &rect);
+
+        if (!isLeaf())
+        {
+            for (size_t i=0;i<4;i++)
+            {
+                if (m_children[i] != nullptr)
+                    m_children[i]->draw(context);
+            }
+        }
+    }
+
+private:
+    std::unique_ptr<Quadtree<T, MAX_DEPTH>> m_children[4];
+
+    std::vector<T> m_objects;
+
+    Rect m_childBoundary[4];
+
+    Rect m_boundary;
+
+    int m_depth;
+
+    void subdivide()
+    {
+        for (int i=0;i<4;i++)
+            m_children[i] = std::make_unique<Quadtree<T, MAX_DEPTH>>(m_childBoundary[i], m_depth + 1);
+
+        std::cout << "Divided\n";
+    }
+
+    bool isLeaf() const
+    {
+        return
+            m_children[0] == nullptr &&
+            m_children[1] == nullptr &&
+            m_children[2] == nullptr &&
+            m_children[3] == nullptr;
+    }
+};
 
 void Player_Renderer(Player* player, SDL_Renderer* context)
 {
@@ -325,8 +427,8 @@ void Player_Renderer(Player* player, SDL_Renderer* context)
 
     const SDL_FRect rect =
     {
-        .x = position.x - scale.x * 0.5f,
-        .y = position.y - scale.x * 0.5f,
+        .x = position.x,
+        .y = position.y,
         .w = scale.x,
         .h = scale.y
     };
@@ -368,16 +470,22 @@ int main()
     bool running = true;
     SDL_Event event;
 
-    QuadTreeManager s_QuadTreeManager;
+    const Vector2 mainScale =
+        { WINDOW_WIDTH, WINDOW_HEIGTH};
+        // { WINDOW_WIDTH / 2.0f, WINDOW_HEIGTH / 2.0f };
 
-    QuadtreeID root =
-        s_QuadTreeManager.Create(
+    const Vector2 mainPosition =
+        { 0.0f, 0.0f };
+        // { WINDOW_WIDTH / 2.0f - mainScale.x * 0.5f, WINDOW_HEIGTH / 2.0f - mainScale.y * 0.5f };
+
+    Quadtree<PlayerID, 8> root(
             {
-                0.0f,
-                0.0f,
-                WINDOW_WIDTH,
-                WINDOW_HEIGTH
-            }
+                mainPosition.x,
+                mainPosition.y,
+                mainScale.x,
+                mainScale.y
+            },
+            0
         );
 
     SparseSet2<Player> playerList;
@@ -405,12 +513,16 @@ int main()
                 .velocity = { 64.0f, 64.0f }
             });
 
+        root.insert(bounds, playerID);
+
+        /*
         QuadtreeID node =
             s_QuadTreeManager.Insert(root, bounds, playerID);
+        */
 
-        auto& player =
-            playerList.get(playerID);
-        player.node = node;
+        // auto& player =
+            // playerList.get(playerID);
+        // player.node = node;
     }
     // */
 
@@ -469,12 +581,15 @@ int main()
 
                     isMouseDown = true;
 
-                    Rect bounds =
+                    const Vector2 scale =
+                        { 16.0f, 16.0f };
+
+                    const Rect bounds =
                     {
-                        (float)downMouseX,
-                        (float)downMouseY,
-                        16.0f,
-                        16.0f
+                        (float)downMouseX - scale.x * 0.5f,
+                        (float)downMouseY - scale.y * 0.5f,
+                        scale.x,
+                        scale.y
                     };
 
                     PlayerID playerID =
@@ -483,12 +598,16 @@ int main()
                             .velocity = { 64.0f, 64.0f }
                         });
 
+                    root.insert(bounds, playerID);
+
+                    /*
                     QuadtreeID node =
                         s_QuadTreeManager.Insert(root, bounds, playerID);
 
                     auto& player =
                         playerList.get(playerID);
                     player.node = node;
+                    */
                 }
                 if (event.button.button == SDL_BUTTON_LEFT)
                 {
@@ -559,7 +678,7 @@ int main()
             Player_Renderer(players + i, renderer);
 
         // Rect _rect = {(float)mouseX, (float)mouseY, 50, 50};
-        s_QuadTreeManager.renderer(renderer, root);
+        root.draw(renderer);
         
         SDL_Rect rect = {mouseX - 50, mouseY - 50, 50 * 2, 50 * 2};
         SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);

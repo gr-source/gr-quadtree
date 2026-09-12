@@ -169,10 +169,16 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/mai
   /usr/include/bits/wctype-wchar.h \
   /usr/include/bits/wordsize.h \
   /usr/include/bits/xopen_lim.h \
+  /usr/include/c++/16/backward/auto_ptr.h \
   /usr/include/c++/16/backward/binders.h \
   /usr/include/c++/16/bit \
+  /usr/include/c++/16/bits/align.h \
   /usr/include/c++/16/bits/alloc_traits.h \
+  /usr/include/c++/16/bits/allocated_ptr.h \
   /usr/include/c++/16/bits/allocator.h \
+  /usr/include/c++/16/bits/atomic_base.h \
+  /usr/include/c++/16/bits/atomic_lockfree_defines.h \
+  /usr/include/c++/16/bits/atomic_wait.h \
   /usr/include/c++/16/bits/basic_ios.h \
   /usr/include/c++/16/bits/basic_ios.tcc \
   /usr/include/c++/16/bits/basic_string.h \
@@ -218,10 +224,16 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/mai
   /usr/include/c++/16/bits/random.h \
   /usr/include/c++/16/bits/random.tcc \
   /usr/include/c++/16/bits/range_access.h \
+  /usr/include/c++/16/bits/ranges_algobase.h \
   /usr/include/c++/16/bits/ranges_base.h \
   /usr/include/c++/16/bits/ranges_cmp.h \
+  /usr/include/c++/16/bits/ranges_uninitialized.h \
   /usr/include/c++/16/bits/ranges_util.h \
+  /usr/include/c++/16/bits/refwrap.h \
   /usr/include/c++/16/bits/requires_hosted.h \
+  /usr/include/c++/16/bits/shared_ptr.h \
+  /usr/include/c++/16/bits/shared_ptr_atomic.h \
+  /usr/include/c++/16/bits/shared_ptr_base.h \
   /usr/include/c++/16/bits/specfun.h \
   /usr/include/c++/16/bits/std_abs.h \
   /usr/include/c++/16/bits/stdexcept_except.h \
@@ -236,7 +248,9 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/mai
   /usr/include/c++/16/bits/stl_iterator_base_types.h \
   /usr/include/c++/16/bits/stl_numeric.h \
   /usr/include/c++/16/bits/stl_pair.h \
+  /usr/include/c++/16/bits/stl_raw_storage_iter.h \
   /usr/include/c++/16/bits/stl_relops.h \
+  /usr/include/c++/16/bits/stl_tempbuf.h \
   /usr/include/c++/16/bits/stl_uninitialized.h \
   /usr/include/c++/16/bits/stl_vector.h \
   /usr/include/c++/16/bits/streambuf.tcc \
@@ -244,6 +258,7 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/mai
   /usr/include/c++/16/bits/string_view.tcc \
   /usr/include/c++/16/bits/stringfwd.h \
   /usr/include/c++/16/bits/uniform_int_dist.h \
+  /usr/include/c++/16/bits/unique_ptr.h \
   /usr/include/c++/16/bits/uses_allocator.h \
   /usr/include/c++/16/bits/uses_allocator_args.h \
   /usr/include/c++/16/bits/utility.h \
@@ -266,8 +281,10 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/mai
   /usr/include/c++/16/debug/assertions.h \
   /usr/include/c++/16/debug/debug.h \
   /usr/include/c++/16/exception \
+  /usr/include/c++/16/ext/aligned_buffer.h \
   /usr/include/c++/16/ext/alloc_traits.h \
   /usr/include/c++/16/ext/atomicity.h \
+  /usr/include/c++/16/ext/concurrence.h \
   /usr/include/c++/16/ext/numeric_traits.h \
   /usr/include/c++/16/ext/string_conversions.h \
   /usr/include/c++/16/ext/type_traits.h \
@@ -278,11 +295,13 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/mai
   /usr/include/c++/16/istream \
   /usr/include/c++/16/limits \
   /usr/include/c++/16/math.h \
+  /usr/include/c++/16/memory \
   /usr/include/c++/16/new \
   /usr/include/c++/16/numbers \
   /usr/include/c++/16/numeric \
   /usr/include/c++/16/ostream \
   /usr/include/c++/16/pstl/execution_defs.h \
+  /usr/include/c++/16/pstl/glue_memory_defs.h \
   /usr/include/c++/16/pstl/glue_numeric_defs.h \
   /usr/include/c++/16/pstl/pstl_config.h \
   /usr/include/c++/16/random \
@@ -511,8 +530,6 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/uintrintrin.h:
 
-/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/tsxldtrkintrin.h:
-
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/tmmintrin.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stdint.h:
@@ -597,8 +614,6 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx512bmmintrin.h:
 
-/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx512bitalgvlintrin.h:
-
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx512bitalgintrin.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx512vpopcntdqvlintrin.h:
@@ -623,13 +638,9 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/include/time.h:
 
-/usr/include/sys/types.h:
-
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/amxtf32intrin.h:
 
 /usr/include/sys/single_threaded.h:
-
-/usr/include/sys/select.h:
 
 /usr/include/sys/cdefs.h:
 
@@ -719,6 +730,8 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/include/c++/16/numbers:
 
+/usr/include/c++/16/memory:
+
 /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++allocator.h:
 
 /usr/include/c++/16/math.h:
@@ -739,7 +752,13 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/include/c++/16/initializer_list:
 
+/usr/include/c++/16/ext/concurrence.h:
+
 /usr/include/c++/16/ext/alloc_traits.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/c++/16/ext/aligned_buffer.h:
 
 /usr/include/c++/16/debug/assertions.h:
 
@@ -751,15 +770,41 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/include/c++/16/cstring:
 
+/usr/include/c++/16/cstdio:
+
+/usr/include/c++/16/cstddef:
+
+/usr/include/c++/16/cerrno:
+
+/usr/include/c++/16/cctype:
+
+/usr/include/c++/16/cassert:
+
+/usr/include/c++/16/bits/version.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/amxtileintrin.h:
+
+/usr/include/c++/16/bits/utility.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/movrsintrin.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/amxfp16intrin.h:
+
+/usr/include/c++/16/bits/uses_allocator_args.h:
+
 /usr/include/bits/types/__mbstate_t.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/fxsrintrin.h:
 
 /usr/include/bits/select.h:
 
+/usr/include/c++/16/bits/atomic_base.h:
+
 /usr/include/c++/16/bits/memoryfwd.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/xtestintrin.h:
+
+/usr/include/c++/16/bits/atomic_wait.h:
 
 /usr/include/bits/pthreadtypes-arch.h:
 
@@ -770,10 +815,6 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 /usr/include/c++/16/bits/exception.h:
 
 /usr/include/bits/posix2_lim.h:
-
-/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx2intrin.h:
-
-/usr/include/bits/mathcalls-narrow.h:
 
 /usr/include/c++/16/bits/stl_relops.h:
 
@@ -809,7 +850,13 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/include/bits/cpu-set.h:
 
+/usr/include/c++/16/pstl/glue_memory_defs.h:
+
 /usr/include/SDL2/SDL_error.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx512bitalgvlintrin.h:
+
+/usr/include/c++/16/bits/atomic_lockfree_defines.h:
 
 /home/NoirVoid/Documentos/gr-quadtree/sparseSet.hpp:
 
@@ -861,8 +908,6 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/include/c++/16/bits/stl_vector.h:
 
-/usr/include/bits/stdint-least.h:
-
 /usr/include/SDL2/SDL_power.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx512vbmivlintrin.h:
@@ -903,9 +948,17 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 
 /usr/include/c++/16/bits/allocator.h:
 
+/usr/include/c++/16/bits/vector.tcc:
+
+/usr/include/bits/floatn.h:
+
+/home/NoirVoid/Documentos/gr-quadtree/player.hpp:
+
 /home/NoirVoid/Documentos/gr-quadtree/math.hpp:
 
-/usr/include/c++/16/cmath:
+/usr/include/c++/16/bits/stl_raw_storage_iter.h:
+
+/usr/include/c++/16/bits/ranges_uninitialized.h:
 
 /usr/include/c++/16/tr1/bessel_function.tcc:
 
@@ -914,8 +967,6 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o: /home/NoirVoid/Documentos/gr-quadtree/p
 /usr/include/bits/stdio_lim.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/crtendS.o:
-
-/usr/include/c++/16/cstdio:
 
 /usr/include/c++/16/bits/specfun.h:
 
@@ -1045,6 +1096,12 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 
 /usr/include/SDL2/SDL_clipboard.h:
 
+/usr/include/pthread.h:
+
+/usr/include/c++/16/compare:
+
+/usr/include/SDL2/SDL_hints.h:
+
 /usr/include/SDL2/SDL_keyboard.h:
 
 /usr/include/c++/16/cstdlib:
@@ -1099,6 +1156,10 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 
 /usr/include/SDL2/SDL_audio.h:
 
+/usr/include/sys/types.h:
+
+/usr/include/c++/16/bits/ranges_algobase.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/mm_malloc.h:
 
 /usr/include/c++/16/tr1/poly_laguerre.tcc:
@@ -1127,13 +1188,23 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 
 /usr/include/ctype.h:
 
+/usr/include/c++/16/bits/stl_tempbuf.h:
+
 /usr/include/SDL2/SDL_gesture.h:
 
 /usr/include/SDL2/SDL_mouse.h:
 
+/usr/include/bits/stdint-least.h:
+
+/usr/include/c++/16/bits/shared_ptr_base.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/waitpkgintrin.h:
 
 /usr/include/SDL2/SDL_events.h:
+
+/usr/include/c++/16/bits/uses_allocator.h:
+
+/usr/include/asm-generic/posix_types.h:
 
 /usr/include/SDL2/SDL_platform.h:
 
@@ -1167,12 +1238,6 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 
 /usr/include/bits/types/struct_itimerspec.h:
 
-/usr/include/bits/floatn.h:
-
-/home/NoirVoid/Documentos/gr-quadtree/player.hpp:
-
-/usr/include/c++/16/bits/vector.tcc:
-
 /usr/include/c++/16/ext/type_traits.h:
 
 /usr/include/bits/thread-shared-types.h:
@@ -1198,8 +1263,6 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 /usr/include/bits/types/__FILE.h:
 
 /usr/include/c++/16/bits/istream.tcc:
-
-/usr/include/c++/16/cerrno:
 
 /usr/include/c++/16/string_view:
 
@@ -1251,6 +1314,8 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 
 /usr/include/c++/16/bits/ostream.tcc:
 
+/usr/include/c++/16/bits/shared_ptr_atomic.h:
+
 /usr/include/c++/16/new:
 
 /usr/include/bits/types/wint_t.h:
@@ -1273,15 +1338,17 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 
 /usr/include/c++/16/bits/ranges_base.h:
 
-/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/movrsintrin.h:
-
-/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/amxfp16intrin.h:
-
-/usr/include/c++/16/bits/uses_allocator_args.h:
+/usr/include/c++/16/backward/auto_ptr.h:
 
 /usr/include/c++/16/bit:
 
+/usr/include/c++/16/cmath:
+
+/usr/include/c++/16/bits/align.h:
+
 /usr/include/c++/16/bits/alloc_traits.h:
+
+/usr/include/c++/16/bits/allocated_ptr.h:
 
 /usr/include/c++/16/cstdint:
 
@@ -1309,10 +1376,6 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 
 /usr/include/c++/16/bits/hash_bytes.h:
 
-/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/amxtileintrin.h:
-
-/usr/include/c++/16/bits/utility.h:
-
 /usr/include/c++/16/bits/exception_defines.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx10_2minmaxintrin.h:
@@ -1333,7 +1396,15 @@ CMakeFiles/gr-quadtree.dir/player.cpp.o:
 
 /usr/include/c++/16/bits/invoke.h:
 
-/usr/include/c++/16/cctype:
+/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx512ifmaintrin.h:
+
+/usr/include/c++/16/utility:
+
+/usr/include/c++/16/concepts:
+
+/usr/include/c++/16/bits/ranges_util.h:
+
+/usr/include/c++/16/bits/locale_classes.h:
 
 /usr/include/c++/16/ext/atomicity.h:
 
@@ -1361,6 +1432,16 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o:
 
 /usr/include/c++/16/bits/ranges_cmp.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx2intrin.h:
+
+/usr/include/bits/mathcalls-narrow.h:
+
+/usr/include/c++/16/bits/refwrap.h:
+
+/usr/include/c++/16/bits/shared_ptr.h:
+
+/usr/include/c++/16/bits/stringfwd.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/lwpintrin.h:
 
 /usr/include/c++/16/bits/stdexcept_throw.h:
@@ -1372,10 +1453,6 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o:
 /usr/include/asm-generic/types.h:
 
 /usr/include/c++/16/bits/stl_bvector.h:
-
-/usr/include/asm-generic/posix_types.h:
-
-/usr/include/c++/16/bits/uses_allocator.h:
 
 /usr/include/c++/16/bits/stl_function.h:
 
@@ -1407,28 +1484,8 @@ CMakeFiles/gr-quadtree.dir/main.cpp.o:
 
 /usr/include/c++/16/bits/streambuf_iterator.h:
 
-/usr/include/c++/16/bits/stringfwd.h:
-
 /usr/include/c++/16/bits/uniform_int_dist.h:
 
-/usr/include/c++/16/bits/version.h:
+/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/tsxldtrkintrin.h:
 
-/usr/include/c++/16/cassert:
-
-/usr/include/pthread.h:
-
-/usr/include/SDL2/SDL_hints.h:
-
-/usr/include/c++/16/compare:
-
-/usr/lib/gcc/x86_64-pc-linux-gnu/16/include/avx512ifmaintrin.h:
-
-/usr/include/c++/16/utility:
-
-/usr/include/c++/16/bits/ranges_util.h:
-
-/usr/include/c++/16/bits/locale_classes.h:
-
-/usr/include/c++/16/concepts:
-
-/usr/include/c++/16/cstddef:
+/usr/include/c++/16/bits/unique_ptr.h:

@@ -43,6 +43,13 @@ typedef struct Rect
     }
     */
 
+    bool contains(const Rect& other) const
+    {
+        return other.x >= x &&
+               other.y >= y &&
+               other.x + other.w <= x + w &&
+               other.y + other.h <= y + h;
+    }
 
     float left()   const { return x; }
     float right()  const { return x + w; }
