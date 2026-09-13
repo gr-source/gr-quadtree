@@ -4,6 +4,8 @@
 
 #include "default.hpp"
 
+#define QUADTREE_DEPTH 8
+
 struct Player
 {
     union
@@ -21,9 +23,6 @@ struct Player
 
     float speed =
         64.0f;
-
-    Quadtree<PlayerID, 8>* node =
-        nullptr;
 };
 
 void Player_Update(Player* player, float dt);

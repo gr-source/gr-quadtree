@@ -12,7 +12,6 @@
 
 #include "sparseSet.hpp"
 
-#include <algorithm>
 #include <iostream>
 
 #define MAX_PLAYERS 0
@@ -71,9 +70,7 @@ public:
 
     Quadtree* insert(const Rect& bounds, T object)
     {
-        assert(m_boundary.contains(bounds));
-
-        if (m_depth < MAX_DEPTH)
+        if (m_depth + 1 < MAX_DEPTH)
         {
             for (size_t i=0;i<4;i++)
             {
@@ -113,49 +110,9 @@ public:
         }
     }
 
-    bool remove(T object)
-    {
-        auto it = std::find_if(m_objects.begin(), m_objects.end(), [&](const ObjectWrapper& wrapper){ return wrapper.element == object;});
-        if (it != m_objects.end())
-        {
-            m_objects.erase(it);
-
-            return true;
-        } else if (!isLeaf())
-        {
-            for (size_t i=0;i<4;i++)
-            {
-                if (m_children[i]->remove(object))
-                {
-                    tryMerge();
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    size_t getObjectCount() const
-    {
-        size_t count = m_objects.size();
-
-        if (!isLeaf())
-        {
-            for (size_t i = 0; i < 4; ++i)
-                count += m_children[i]->getObjectCount();
-        }
-
-        return count;
-    }
-
     bool contains(const Rect& bounds) const
     {
         return m_boundary.contains(bounds);
-    }
-
-    bool intersects(const Rect& bounds) const
-    {
-        return m_boundary.intersects(bounds);
     }
 
     void draw(SDL_Renderer* context) const
@@ -211,43 +168,6 @@ private:
 
     int m_depth;
 
-    void tryMerge()
-    {
-        if (isLeaf())
-            return;
-
-        for (size_t i=0;i<4;i++)
-        {
-            if (m_children[i]->getObjectCount() > 0)
-                return;
-
-            if (!m_children[i]->isLeaf())
-                return;
-        }
-
-        /*
-        std::vector<ObjectWrapper> objects;
-        collectObjects(objects);
-
-        m_objects = std::move(objects);
-        */
-
-        for (size_t i = 0; i < 4; ++i)
-            m_children[i].reset();
-    }
-
-    void collectObjects(std::vector<ObjectWrapper>& objects)
-    {
-        for (auto& object : m_objects)
-            objects.push_back(object);
-
-        if (!isLeaf())
-        {
-            for (size_t i = 0; i < 4; ++i)
-                m_children[i]->collectObjects(objects);
-        }
-    }
-
     void subdivide()
     {
         for (int i=0;i<4;i++)
@@ -277,7 +197,7 @@ void Player_Renderer(Player* player, SDL_Renderer* context)
         .h = scale.y
     };
 
-    SDL_SetRenderDrawColor(context, 0, 0, 255, 255);
+    SDL_SetRenderDrawColor(context, 255, 0, 255, 255);
     SDL_RenderFillRectF(context, &rect);
 }
 
@@ -301,7 +221,7 @@ int main()
         return 1;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr)
     {
         SDL_DestroyWindow(window);
@@ -309,7 +229,7 @@ int main()
         return 1;
     }
 
-    // SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(1);
 
     bool running = true;
     SDL_Event event;
@@ -357,12 +277,12 @@ int main()
                 .velocity = { 32.0f, 32.0f }
             });
 
-        auto node =
+        Quadtree<PlayerID, 8>* node =
             root.insert(bounds, playerID);
 
-        // auto& player =
-        //     playerList.get(playerID);
-        // player.node = node;
+        auto& player =
+            playerList.get(playerID);
+        player.node = node;
     }
 
     int mouseX = 0, mouseY = 0;
@@ -390,8 +310,8 @@ int main()
             }
             else if (event.type == SDL_MOUSEMOTION)
             {
-                mouseX = event.motion.x;
-                mouseY = event.motion.y;
+                mouseX = event.button.x;
+                mouseY = event.button.y;
 
                 if (event.button.button == SDL_BUTTON_LEFT)
                 {
@@ -416,20 +336,18 @@ int main()
                         PLAYER_SIZE
                     };
 
-                    if (root.contains(bounds))
-                    {
-                        PlayerID playerID =
-                            playerList.emplace(Player{
-                                .bounds = bounds,
-                                .velocity = { 64.0f, 64.0f }
-                            });
+                    PlayerID playerID =
+                        playerList.emplace(Player{
+                            .bounds = bounds,
+                            .velocity = { 64.0f, 64.0f }
+                        });
 
-                        Quadtree<PlayerID, QUADTREE_DEPTH>* node =
-                            root.insert(bounds, playerID);
+                    Quadtree<PlayerID, 8>* node =
+                        root.insert(bounds, playerID);
 
-                        auto& player =
-                            playerList.get(playerID);
-                    }
+                    auto& player =
+                        playerList.get(playerID);
+                    player.node = node;
                 }
                 if (event.button.button == SDL_BUTTON_LEFT)
                 {
@@ -447,8 +365,7 @@ int main()
                     std::vector<PlayerID> players;
                     root.query(rect, players);
 
-                    for (auto& playerID : players)
-                        root.remove(playerID);
+                    std::cout << players.size() << std::endl;
                 }
             } 
             else if (event.type == SDL_MOUSEBUTTONUP)
@@ -475,6 +392,7 @@ int main()
         Player* players =
             playerList.data();
 
+        /*
         for (size_t i=0;i<playerList.count();i++)
         {
             Player& player =
@@ -485,22 +403,28 @@ int main()
             PlayerID playerID =
                 playerList.denseToSparse(i);
 
+            if (player.node != nullptr)
             {
-                // if (!player.node->contains(player.bounds))
+                if (!player.node->contains(player.bounds))
                 {
-                    root.remove(playerID);
-                    root.insert(player.bounds, playerID);
+                    player.node->remove(playerID);
+                    player.node = root.insert(player.bounds, playerID);
+
+                    std::cout << "Nd\n";
                 }
             }
         }
+        */
 
         // s_QuadTreeManager.update(root, root, deltaTime);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        // for (size_t i=0;i<playerList.count();i++)
-        //     Player_Renderer(players + i, renderer);
+        /*
+        for (size_t i=0;i<playerList.count();i++)
+            Player_Renderer(players + i, renderer);
+        */
 
         // Rect _rect = {(float)mouseX, (float)mouseY, 50, 50};
         root.draw(renderer);
